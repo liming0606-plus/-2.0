@@ -1071,6 +1071,7 @@
                         <th style="min-width:100px;">人员范围</th>
                         <th style="min-width:180px;">生效时间</th>
                         <th style="min-width:60px;">状态</th>
+                        <th style="min-width:70px;text-align:center;">操作</th>
                     </tr>
                 </thead>
                 <tbody id="egn_tbody"></tbody>
@@ -1095,6 +1096,27 @@
         <div style="overflow-y:auto;flex:1;padding:18px 22px;" id="egnModalBody"></div>
         <div style="padding:12px 22px;background:#f8fafc;border-top:1px solid #e8edf3;text-align:right;flex-shrink:0;">
             <button onclick="document.getElementById('egnMemberModal').style.display='none'" style="padding:8px 20px;background:#2d5a87;color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer;">关闭</button>
+        </div>
+    </div>
+</div>
+
+<!-- 移除汇报组确认弹窗 -->
+<div id="egnRemoveModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:10001;justify-content:center;align-items:center;">
+    <div style="background:#fff;border-radius:12px;width:420px;max-width:92vw;box-shadow:0 16px 48px rgba(0,0,0,0.25);overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#7f1d1d,#c0392b);padding:16px 22px;color:#fff;display:flex;align-items:center;gap:10px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span style="font-size:15px;font-weight:700;">确认移除</span>
+        </div>
+        <div style="padding:24px 24px 8px;">
+            <p style="font-size:14px;color:#1a2332;margin:0 0 12px;">确定要移除汇报组 <b id="egnRemoveName" style="color:#c0392b;"></b> 吗？</p>
+            <div style="background:#fff5f5;border:1px solid #fecaca;border-radius:8px;padding:12px 14px;display:flex;gap:8px;align-items:flex-start;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span style="font-size:12px;color:#7f1d1d;line-height:1.6;">移除后，该汇报组将不再进行汇报组的数据分析。</span>
+            </div>
+        </div>
+        <div style="padding:16px 24px 20px;display:flex;justify-content:flex-end;gap:10px;">
+            <button onclick="egnRemoveCancel()" style="padding:8px 20px;background:#f0f4f8;color:#5a6b7d;border:1px solid #e0e7ef;border-radius:7px;font-size:13px;cursor:pointer;">取消</button>
+            <button onclick="egnRemoveConfirm()" style="padding:8px 20px;background:#c0392b;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;">确认移除</button>
         </div>
     </div>
 </div>
@@ -9232,10 +9254,32 @@ function egnRender() {
         html += '<td>' + memberCell + '</td>';
         html += '<td style="font-size:12px;color:#5a6b7d;">' + timeStr + '</td>';
         html += '<td>' + statusBadge + '</td>';
+        html += '<td style="text-align:center;"><button onclick="egnRemoveGroup(\''+g.id+'\',\''+g.name.replace(/\'/g,'\\\'')+'\')" style="padding:4px 12px;background:#fff0f0;color:#c0392b;border:1px solid #f5c6cb;border-radius:5px;font-size:12px;cursor:pointer;font-weight:500;">移除</button></td>';
         html += '</tr>';
     });
 
     tbody.innerHTML = html;
+}
+
+/* ========== 移除汇报组 ========== */
+function egnRemoveGroup(id, name) {
+    document.getElementById('egnRemoveName').textContent = name;
+    document.getElementById('egnRemoveModal').dataset.targetId = id;
+    document.getElementById('egnRemoveModal').style.display = 'flex';
+}
+function egnRemoveCancel() {
+    document.getElementById('egnRemoveModal').style.display = 'none';
+}
+function egnRemoveConfirm() {
+    var id = document.getElementById('egnRemoveModal').dataset.targetId;
+    if (typeof expGroups !== 'undefined') {
+        for (var i = 0; i < expGroups.length; i++) {
+            if (expGroups[i].id === id) { expGroups.splice(i, 1); break; }
+        }
+        try { localStorage.setItem('expGroups', JSON.stringify(expGroups)); } catch(e){}
+    }
+    egnRemoveCancel();
+    egnRender();
 }
 
 /* ========== 选择汇报组弹窗（多选） ========== */
