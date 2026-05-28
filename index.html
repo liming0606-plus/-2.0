@@ -1106,7 +1106,7 @@
         <div style="background:linear-gradient(135deg,#1a3a5c,#2d5a87);padding:16px 22px;color:#fff;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
             <div>
                 <div style="font-size:15px;font-weight:700;">选择汇报组</div>
-                <div style="font-size:11px;opacity:0.75;margin-top:2px;">点击行即可选定汇报组</div>
+                <div style="font-size:11px;opacity:0.75;margin-top:2px;">点击行可多选，再次点击取消选择</div>
             </div>
             <button onclick="egnClosePicker()" style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1;">×</button>
         </div>
@@ -9238,13 +9238,13 @@ function egnRender() {
     tbody.innerHTML = html;
 }
 
-/* ========== 选择汇报组弹窗 ========== */
-var _epSelectedId = null;   // 当前选中的汇报组 id
-var _epCallback   = null;   // 选定后的回调 function(group){}
+/* ========== 选择汇报组弹窗（多选） ========== */
+var _epSelectedIds = [];    // 当前已勾选的汇报组 id 数组
+var _epCallback    = null;  // 确定后的回调 function(groups){}
 
 // 打开弹窗（可传入回调）
 function egnOpenPicker(callback) {
-    _epSelectedId = null;
+    _epSelectedIds = [];
     _epCallback = (typeof callback === 'function') ? callback : null;
     // 同步品类下拉
     var cats = [];
@@ -9264,8 +9264,7 @@ function egnOpenPicker(callback) {
     // 重置筛选
     var fn = document.getElementById('ep_filterName'); if (fn) fn.value = '';
     var fc = document.getElementById('ep_filterCamp'); if (fc) fc.value = '';
-    // 重置已选
-    _epSetSelected(null);
+    _epRefreshFooter();
     egnPickerRender();
     document.getElementById('egnPickerModal').style.display = 'flex';
 }
@@ -9281,21 +9280,28 @@ function egnPickerClearFilter() {
     egnPickerRender();
 }
 
-function _epSetSelected(id) {
-    _epSelectedId = id;
+// 刷新底部已选摘要 + 确定按钮状态
+function _epRefreshFooter() {
     var nameEl = document.getElementById('ep_selectedName');
     var btn    = document.getElementById('ep_confirmBtn');
-    if (!id) {
+    var count  = _epSelectedIds.length;
+    if (count === 0) {
         if (nameEl) nameEl.textContent = '（未选择）';
         if (btn) { btn.disabled = true; btn.style.background = '#bbb'; btn.style.cursor = 'not-allowed'; }
-        return;
+    } else {
+        // 拼接名称（最多显示3条，超出用 +N）
+        var names = [];
+        if (typeof expGroups !== 'undefined') {
+            _epSelectedIds.forEach(function(id) {
+                for (var i = 0; i < expGroups.length; i++) {
+                    if (expGroups[i].id === id) { names.push(expGroups[i].name); break; }
+                }
+            });
+        }
+        var label = names.slice(0,3).join('、') + (names.length > 3 ? ' 等'+names.length+'个' : '');
+        if (nameEl) nameEl.textContent = label;
+        if (btn) { btn.disabled = false; btn.style.background = 'linear-gradient(135deg,#2d5a87,#1e3a5f)'; btn.style.cursor = 'pointer'; }
     }
-    var g = null;
-    if (typeof expGroups !== 'undefined') {
-        for (var i = 0; i < expGroups.length; i++) { if (expGroups[i].id === id) { g = expGroups[i]; break; } }
-    }
-    if (nameEl) nameEl.textContent = g ? g.name + (g.cat ? '（'+g.cat+'）' : '') : id;
-    if (btn) { btn.disabled = false; btn.style.background = 'linear-gradient(135deg,#2d5a87,#1e3a5f)'; btn.style.cursor = 'pointer'; }
 }
 
 function egnPickerRender() {
@@ -9314,7 +9320,7 @@ function egnPickerRender() {
     var countEl = document.getElementById('ep_count');
     if (countEl) countEl.textContent = '共 ' + filtered.length + ' 条';
 
-    var tbody  = document.getElementById('ep_tbody');
+    var tbody   = document.getElementById('ep_tbody');
     var emptyEl = document.getElementById('ep_empty');
     if (!tbody) return;
 
@@ -9328,7 +9334,7 @@ function egnPickerRender() {
     var today = new Date().toISOString().slice(0, 10);
     var html = '';
     filtered.forEach(function(g) {
-        var isSelected = g.id === _epSelectedId;
+        var isChecked = _epSelectedIds.indexOf(g.id) >= 0;
 
         // 当前生效 scope
         var activeScope = null;
@@ -9359,15 +9365,18 @@ function egnPickerRender() {
             campsHtml = '<span style="font-size:11px;color:#c0c8d0;">全部训练营</span>';
         }
 
-        var rowBg = isSelected ? '#e8f3ff' : '';
-        var radioHtml = isSelected
-            ? '<span style="display:inline-block;width:16px;height:16px;border-radius:50%;background:#2d5a87;border:2px solid #2d5a87;position:relative;"><span style="display:block;width:6px;height:6px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;"></span></span>'
-            : '<span style="display:inline-block;width:16px;height:16px;border-radius:50%;border:2px solid #c0cad6;"></span>';
+        // 复选框样式
+        var checkHtml = isChecked
+            ? '<span style="display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:4px;background:#2d5a87;border:2px solid #2d5a87;flex-shrink:0;">'
+              + '<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+              + '</span>'
+            : '<span style="display:inline-block;width:17px;height:17px;border-radius:4px;border:2px solid #c0cad6;background:#fff;flex-shrink:0;"></span>';
 
-        html += '<tr onclick="egnPickerSelectRow(\''+g.id+'\')" style="cursor:pointer;background:'+rowBg+';transition:background 0.15s;" id="ep_row_'+g.id+'"'
-              + ' onmouseover="if(\''+g.id+'\' !== _epSelectedId) this.style.background=\'#f5f9ff\'"'
-              + ' onmouseout="this.style.background=\''+(isSelected?'#e8f3ff':'')+'\';">';
-        html += '<td style="padding:11px 10px;border-bottom:1px solid #f0f4f8;text-align:center;">'+radioHtml+'</td>';
+        var rowBg = isChecked ? '#f0f6ff' : '';
+        html += '<tr onclick="egnPickerToggleRow(\''+g.id+'\')" style="cursor:pointer;background:'+rowBg+';transition:background 0.12s;" id="ep_row_'+g.id+'"'
+              + ' onmouseover="if(_epSelectedIds.indexOf(\''+g.id+'\')<0)this.style.background=\'#f5f9ff\'"'
+              + ' onmouseout="this.style.background=(_epSelectedIds.indexOf(\''+g.id+'\')>=0?\'#f0f6ff\':\'\')">';
+        html += '<td style="padding:11px 10px;border-bottom:1px solid #f0f4f8;text-align:center;">'+checkHtml+'</td>';
         html += '<td style="padding:11px 10px;border-bottom:1px solid #f0f4f8;font-weight:600;color:#1a2332;font-size:13px;">'+g.name+'</td>';
         html += '<td style="padding:11px 10px;border-bottom:1px solid #f0f4f8;"><span style="padding:3px 9px;background:#e3f2fd;color:#1565c0;border-radius:10px;font-size:12px;">'+(g.cat||'-')+'</span></td>';
         html += '<td style="padding:11px 10px;border-bottom:1px solid #f0f4f8;">'+campsHtml+'</td>';
@@ -9377,42 +9386,47 @@ function egnPickerRender() {
     tbody.innerHTML = html;
 }
 
-function egnPickerSelectRow(id) {
-    _epSetSelected(id);
-    // 刷新所有行的高亮状态
-    var rows = document.querySelectorAll('#ep_tbody tr');
-    rows.forEach(function(row) {
-        var rid = row.id.replace('ep_row_', '');
-        var sel = rid === id;
-        row.style.background = sel ? '#e8f3ff' : '';
-        var radio = row.querySelector('td:first-child span');
-        if (radio) {
-            radio.style.background     = sel ? '#2d5a87' : '';
-            radio.style.border         = sel ? '2px solid #2d5a87' : '2px solid #c0cad6';
-            radio.style.borderRadius   = '50%';
-            var dot = radio.querySelector('span');
-            if (sel && !dot) {
-                radio.innerHTML = '<span style="display:block;width:6px;height:6px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;"></span>';
-                radio.style.position = 'relative';
-            } else if (!sel && dot) {
-                radio.innerHTML = '';
-            }
+// 勾选/取消勾选某行
+function egnPickerToggleRow(id) {
+    var idx = _epSelectedIds.indexOf(id);
+    if (idx >= 0) {
+        _epSelectedIds.splice(idx, 1);
+    } else {
+        _epSelectedIds.push(id);
+    }
+    // 更新该行复选框外观
+    var row = document.getElementById('ep_row_' + id);
+    if (row) {
+        var isChecked = _epSelectedIds.indexOf(id) >= 0;
+        row.style.background = isChecked ? '#f0f6ff' : '';
+        var td = row.querySelector('td:first-child');
+        if (td) {
+            td.innerHTML = isChecked
+                ? '<span style="display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:4px;background:#2d5a87;border:2px solid #2d5a87;flex-shrink:0;">'
+                  + '<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+                  + '</span>'
+                : '<span style="display:inline-block;width:17px;height:17px;border-radius:4px;border:2px solid #c0cad6;background:#fff;flex-shrink:0;"></span>';
         }
-    });
+    }
+    _epRefreshFooter();
 }
 
 function egnPickerConfirm() {
-    if (!_epSelectedId) return;
-    var g = null;
+    if (!_epSelectedIds.length) return;
+    var groups = [];
     if (typeof expGroups !== 'undefined') {
-        for (var i = 0; i < expGroups.length; i++) { if (expGroups[i].id === _epSelectedId) { g = expGroups[i]; break; } }
+        _epSelectedIds.forEach(function(id) {
+            for (var i = 0; i < expGroups.length; i++) {
+                if (expGroups[i].id === id) { groups.push(expGroups[i]); break; }
+            }
+        });
     }
     egnClosePicker();
-    if (_epCallback && g) {
-        _epCallback(g);
-    } else if (g) {
-        // 默认行为：弹出提示
-        alert('已选择汇报组：' + g.name);
+    if (_epCallback && groups.length) {
+        _epCallback(groups);
+    } else if (groups.length) {
+        // 默认行为：提示已选名称
+        alert('已选择 ' + groups.length + ' 个汇报组：' + groups.map(function(g){return g.name;}).join('、'));
     }
 }
 
