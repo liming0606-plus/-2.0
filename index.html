@@ -181,7 +181,7 @@
             /* 隐藏管理员模式 */
             .admin-toggle { display: none !important; }
             .nav-tab.admin-tab { display: none !important; }
-            #targetcfg, #targetsetup, #dataentry, #expgroup, #catmgmt, #effrules { display: none !important; }
+            #targetcfg, #targetsetup, #dataentry, #expgroup, #expgroupNew, #catmgmt, #effrules { display: none !important; }
 
             /* Header 紧凑 */
             .header { padding: 14px 16px; flex-wrap: wrap; gap: 8px; }
@@ -337,6 +337,7 @@
     <div class="nav-tab" onclick="switchTab('feCat')" style="display:none;">前端品类人效看板</div>
     <div class="nav-tab" onclick="switchTab('beCat')" style="display:none;">后端品类人效看板</div>
     <div class="nav-tab admin-tab" id="adminExpTabBtn" onclick="switchTab('expgroup')">汇报组管理</div>
+    <div class="nav-tab admin-tab" onclick="switchTab('expgroupNew')">汇报组管理（新）</div>
     <!-- <div class="nav-tab admin-tab" id="adminTabBtn" onclick="switchTab('targetcfg')">目标配置</div> -->
     <div class="nav-tab admin-tab" onclick="switchTab('targetsetup')">目标设置</div>
     <div class="nav-tab admin-tab" onclick="switchTab('catmgmt')">品类管理</div>
@@ -990,6 +991,106 @@
         <div style="display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid #edf1f5;">
             <button onclick="saveExpGroup()" style="padding:10px 24px;background:#6c5ce7;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">保存</button>
             <button onclick="cancelExpForm()" style="padding:10px 24px;background:#f0f4f8;color:#5a6b7d;border:1px solid #e0e7ef;border-radius:8px;font-size:13px;cursor:pointer;">取消</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== 汇报组管理（新）========== -->
+<div class="section" id="expgroupNew">
+    <!-- 顶部标题 -->
+    <div style="background:linear-gradient(135deg,#1e3a5f,#2d5a87);border-radius:12px 12px 0 0;padding:16px 22px;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:18px;">👥</span>
+            <div>
+                <div style="font-size:15px;font-weight:700;">汇报组管理</div>
+                <div style="font-size:12px;opacity:0.8;margin-top:2px;">汇报组数据来源于管理后台，此处仅作查阅与分析</div>
+            </div>
+        </div>
+        <!-- 快捷操作 -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a href="https://edu-admin.qlchat.com/xqd-common/human-efficiency-dashboard" target="_blank"
+               style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:7px;color:#fff;font-size:12px;font-weight:600;text-decoration:none;transition:background 0.2s;"
+               onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'"
+               title="兴趣岛管理后台 > 售前管理 > 售前数据 > 前端人效看板 > 汇报组管理">
+                🔗 前端汇报组配置
+            </a>
+            <a href="https://edu-admin.qlchat.com/xqd-common/backend-human-efficiency-dashboard" target="_blank"
+               style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:7px;color:#fff;font-size:12px;font-weight:600;text-decoration:none;transition:background 0.2s;"
+               onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'"
+               title="兴趣岛管理后台 > 售后管理 > 售后数据 > 后端人效看板 > 汇报组管理">
+                🔗 后端汇报组配置
+            </a>
+        </div>
+    </div>
+
+    <!-- 配置位置提示 -->
+    <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:0;padding:10px 22px;display:flex;gap:16px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:#7a6000;">📍 前端：兴趣岛管理后台 &gt; 售前管理 &gt; 售前数据 &gt; 前端人效看板 &gt; <b>汇报组管理</b></span>
+        <span style="font-size:12px;color:#7a6000;border-left:1px solid #ffe082;padding-left:16px;">📍 后端：兴趣岛管理后台 &gt; 售后管理 &gt; 售后数据 &gt; 后端人效看板 &gt; <b>汇报组管理</b></span>
+    </div>
+
+    <!-- 筛选栏 -->
+    <div style="background:#fff;border-bottom:1px solid #e8edf3;padding:14px 22px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <div style="display:flex;align-items:center;gap:6px;">
+            <label style="font-size:12px;color:#5a6b7d;white-space:nowrap;">汇报组名称：</label>
+            <input type="text" id="egn_filterName" placeholder="输入名称搜索" oninput="egnRender()"
+                style="padding:7px 10px;border:1px solid #e0e7ef;border-radius:6px;font-size:12px;width:150px;outline:none;">
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+            <label style="font-size:12px;color:#5a6b7d;white-space:nowrap;">品类：</label>
+            <select id="egn_filterCat" onchange="egnRender()"
+                style="padding:7px 10px;border:1px solid #e0e7ef;border-radius:6px;font-size:12px;min-width:110px;background:#fff;">
+                <option value="">全部品类</option>
+            </select>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+            <label style="font-size:12px;color:#5a6b7d;white-space:nowrap;">训练营：</label>
+            <input type="text" id="egn_filterCamp" placeholder="输入训练营搜索" oninput="egnRender()"
+                style="padding:7px 10px;border:1px solid #e0e7ef;border-radius:6px;font-size:12px;width:150px;outline:none;">
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+            <span id="egn_count" style="font-size:12px;color:#95a5a6;"></span>
+            <button onclick="egnClearFilter()" style="padding:7px 14px;background:#f0f4f8;color:#5a6b7d;border:1px solid #e0e7ef;border-radius:6px;font-size:12px;cursor:pointer;">清空筛选</button>
+        </div>
+    </div>
+
+    <!-- 列表 -->
+    <div style="background:#f5f7fa;padding:20px 22px;border-radius:0 0 12px 12px;min-height:300px;">
+        <div style="overflow-x:auto;">
+            <table class="tbl" style="background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,0.04);">
+                <thead>
+                    <tr>
+                        <th style="width:36px;text-align:center;">#</th>
+                        <th style="min-width:140px;">汇报组名称</th>
+                        <th style="min-width:90px;">品类</th>
+                        <th style="min-width:200px;">训练营</th>
+                        <th style="min-width:100px;">人员范围</th>
+                        <th style="min-width:180px;">生效时间</th>
+                        <th style="min-width:60px;">状态</th>
+                    </tr>
+                </thead>
+                <tbody id="egn_tbody"></tbody>
+            </table>
+        </div>
+        <div id="egn_empty" style="display:none;text-align:center;padding:40px;color:#95a5a6;font-size:13px;">
+            暂无数据，请通过上方「前端/后端汇报组配置」链接在管理后台配置数据
+        </div>
+    </div>
+</div>
+
+<!-- 人员详情弹窗 -->
+<div id="egnMemberModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;justify-content:center;align-items:center;">
+    <div style="background:#fff;border-radius:14px;width:520px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.3);overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#1a3a5c,#2d5a87);padding:16px 22px;color:#fff;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+            <div>
+                <div id="egnModalTitle" style="font-size:15px;font-weight:700;"></div>
+                <div id="egnModalSubtitle" style="font-size:11px;opacity:0.8;margin-top:2px;"></div>
+            </div>
+            <button onclick="document.getElementById('egnMemberModal').style.display='none'" style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1;">×</button>
+        </div>
+        <div style="overflow-y:auto;flex:1;padding:18px 22px;" id="egnModalBody"></div>
+        <div style="padding:12px 22px;background:#f8fafc;border-top:1px solid #e8edf3;text-align:right;flex-shrink:0;">
+            <button onclick="document.getElementById('egnMemberModal').style.display='none'" style="padding:8px 20px;background:#2d5a87;color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer;">关闭</button>
         </div>
     </div>
 </div>
@@ -1719,6 +1820,10 @@ function switchTab(id) {
     // 切换到目标设置时初始化
     if (id === 'targetsetup') {
         initTargetSetupOnEnter();
+    }
+    // 切换到汇报组管理（新）时初始化
+    if (id === 'expgroupNew') {
+        egnInit();
     }
 
     // 恢复目标看板的滚动位置
@@ -8872,6 +8977,200 @@ function _bindTsYearChange() {
     for (var yid in yMap) {
         (function(id, fn){ var el = document.getElementById(id); if(el) el.addEventListener('change', fn); })(yid, yMap[yid]);
     }
+}
+
+// ===================================================
+// ===== 汇报组管理（新）模块 =====
+// ===================================================
+
+var _egnInited = false;
+
+function egnInit() {
+    // 初始化品类筛选下拉（复用 expGroups 数据）
+    var cats = [];
+    if (typeof expGroups !== 'undefined') {
+        expGroups.forEach(function(g) { if (g.cat && cats.indexOf(g.cat) < 0) cats.push(g.cat); });
+    }
+    // 补充 campsByCat 里的品类
+    if (typeof campsByCat !== 'undefined') {
+        Object.keys(campsByCat).forEach(function(c) { if (cats.indexOf(c) < 0) cats.push(c); });
+    }
+    cats.sort();
+    var sel = document.getElementById('egn_filterCat');
+    if (sel) {
+        var h = '<option value="">全部品类</option>';
+        cats.forEach(function(c) { h += '<option value="'+c+'">'+c+'</option>'; });
+        sel.innerHTML = h;
+    }
+    egnRender();
+    _egnInited = true;
+}
+
+function egnClearFilter() {
+    var n = document.getElementById('egn_filterName');
+    var c = document.getElementById('egn_filterCat');
+    var cp = document.getElementById('egn_filterCamp');
+    if (n) n.value = '';
+    if (c) c.value = '';
+    if (cp) cp.value = '';
+    egnRender();
+}
+
+function egnGetMemberNames(scope) {
+    // 返回人员名称列表
+    var names = [];
+    if (!scope) return names;
+    if (scope.type === 'member' && scope.members && scope.members.length) {
+        scope.members.forEach(function(mid) {
+            var m = null;
+            if (typeof orgMembers !== 'undefined') {
+                for (var i = 0; i < orgMembers.length; i++) {
+                    if (orgMembers[i].id === mid) { m = orgMembers[i]; break; }
+                }
+            }
+            names.push(m ? m.name : mid);
+        });
+    } else if (scope.type === 'dept' && scope.depts && scope.depts.length) {
+        // 按部门查找成员
+        scope.depts.forEach(function(deptId) {
+            if (typeof orgMembers !== 'undefined') {
+                orgMembers.forEach(function(m) {
+                    if (m.dept === deptId) names.push(m.name);
+                });
+            }
+            if (!names.length) names.push('[部门: ' + deptId + ']');
+        });
+    }
+    return names;
+}
+
+function egnShowMemberDetail(groupId) {
+    var g = null;
+    if (typeof expGroups !== 'undefined') {
+        for (var i = 0; i < expGroups.length; i++) {
+            if (expGroups[i].id === groupId) { g = expGroups[i]; break; }
+        }
+    }
+    if (!g) return;
+
+    document.getElementById('egnModalTitle').textContent = g.name + ' — 人员详情';
+    document.getElementById('egnModalSubtitle').textContent = '品类：' + g.cat + (g.camps && g.camps.length ? '  |  训练营：' + g.camps.join('、') : '');
+
+    var html = '';
+    if (!g.scopes || !g.scopes.length) {
+        html = '<div style="text-align:center;color:#95a5a6;padding:30px;font-size:13px;">暂无人员范围配置</div>';
+    } else {
+        g.scopes.forEach(function(scope, idx) {
+            var names = egnGetMemberNames(scope);
+            var typeLabel = scope.type === 'member' ? '指定人员' : '按部门';
+            html += '<div style="margin-bottom:16px;padding:14px;background:#f8fafc;border-radius:8px;border-left:3px solid #2d5a87;">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+            html += '<span style="font-size:12px;font-weight:600;color:#2d5a87;">时段 ' + (idx+1) + '：' + (scope.startDate||'') + ' ~ ' + (scope.endDate||'') + '</span>';
+            html += '<span style="font-size:11px;background:#e8f0fa;color:#2d5a87;padding:2px 8px;border-radius:10px;">' + typeLabel + '</span>';
+            html += '</div>';
+            if (names.length) {
+                html += '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+                names.forEach(function(name) {
+                    html += '<span style="padding:4px 10px;background:#fff;border:1px solid #e0e7ef;border-radius:16px;font-size:12px;color:#3a4a5c;">' + name + '</span>';
+                });
+                html += '</div>';
+                html += '<div style="font-size:11px;color:#95a5a6;margin-top:8px;">共 ' + names.length + ' 人</div>';
+            } else {
+                html += '<div style="font-size:12px;color:#95a5a6;">暂无人员数据</div>';
+            }
+            html += '</div>';
+        });
+    }
+
+    document.getElementById('egnModalBody').innerHTML = html;
+    document.getElementById('egnMemberModal').style.display = 'flex';
+}
+
+function egnRender() {
+    if (!document.getElementById('egn_tbody')) return;
+
+    var filterName = (document.getElementById('egn_filterName') ? document.getElementById('egn_filterName').value : '').trim().toLowerCase();
+    var filterCat  = document.getElementById('egn_filterCat')  ? document.getElementById('egn_filterCat').value  : '';
+    var filterCamp = (document.getElementById('egn_filterCamp') ? document.getElementById('egn_filterCamp').value : '').trim().toLowerCase();
+
+    var list = (typeof expGroups !== 'undefined') ? expGroups : [];
+    var filtered = list.filter(function(g) {
+        if (filterName && g.name.toLowerCase().indexOf(filterName) < 0) return false;
+        if (filterCat  && g.cat !== filterCat) return false;
+        if (filterCamp && (!g.camps || !g.camps.some(function(c){ return c.toLowerCase().indexOf(filterCamp) >= 0; }))) return false;
+        return true;
+    });
+
+    // 计数
+    var countEl = document.getElementById('egn_count');
+    if (countEl) countEl.textContent = '共 ' + filtered.length + ' 条';
+
+    var emptyEl = document.getElementById('egn_empty');
+    var tbody = document.getElementById('egn_tbody');
+
+    if (!filtered.length) {
+        tbody.innerHTML = '';
+        if (emptyEl) emptyEl.style.display = 'block';
+        return;
+    }
+    if (emptyEl) emptyEl.style.display = 'none';
+
+    var today = new Date().toISOString().slice(0, 10);
+    var html = '';
+    filtered.forEach(function(g, idx) {
+        // 当前生效时段
+        var activeScope = null;
+        if (g.scopes && g.scopes.length) {
+            g.scopes.forEach(function(s) {
+                if (s.startDate <= today && today <= (s.endDate || '9999')) activeScope = s;
+            });
+        }
+        // 状态
+        var isActive = !!activeScope;
+        var statusBadge = isActive
+            ? '<span class="badge hi">生效中</span>'
+            : '<span class="badge mi">未生效</span>';
+
+        // 人员摘要
+        var memberCount = 0;
+        if (activeScope) {
+            var names = egnGetMemberNames(activeScope);
+            memberCount = names.length;
+        }
+        var memberCell = memberCount > 0
+            ? '<button onclick="egnShowMemberDetail(\''+g.id+'\')" style="padding:4px 10px;background:#e8f0fa;color:#2d5a87;border:none;border-radius:5px;font-size:12px;cursor:pointer;font-weight:600;">'+memberCount+'人 · 查看详情</button>'
+            : '<button onclick="egnShowMemberDetail(\''+g.id+'\')" style="padding:4px 10px;background:#f0f4f8;color:#95a5a6;border:none;border-radius:5px;font-size:12px;cursor:pointer;">查看详情</button>';
+
+        // 生效时间（当前时段）
+        var timeStr = activeScope
+            ? (activeScope.startDate + ' ~ ' + activeScope.endDate)
+            : (g.scopes && g.scopes.length ? g.scopes[0].startDate + ' ~ ' + g.scopes[g.scopes.length-1].endDate : '-');
+
+        // 训练营标签
+        var campsHtml = '';
+        if (g.camps && g.camps.length) {
+            g.camps.slice(0, 3).forEach(function(c) {
+                campsHtml += '<span style="display:inline-block;padding:2px 7px;background:#f0f4f8;border-radius:10px;font-size:11px;color:#5a6b7d;margin:1px;">' + c + '</span>';
+            });
+            if (g.camps.length > 3) {
+                campsHtml += '<span style="font-size:11px;color:#95a5a6;"> +' + (g.camps.length-3) + '</span>';
+            }
+        } else {
+            campsHtml = '<span style="font-size:11px;color:#c0c8d0;">全部训练营</span>';
+        }
+
+        html += '<tr>';
+        html += '<td style="text-align:center;color:#95a5a6;font-size:11px;">' + (idx+1) + '</td>';
+        html += '<td><span style="font-size:13px;font-weight:600;color:#1a2332;">' + g.name + '</span></td>';
+        html += '<td><span style="padding:3px 9px;background:#e3f2fd;color:#1565c0;border-radius:10px;font-size:12px;">' + (g.cat||'-') + '</span></td>';
+        html += '<td>' + (campsHtml||'-') + '</td>';
+        html += '<td>' + memberCell + '</td>';
+        html += '<td style="font-size:12px;color:#5a6b7d;">' + timeStr + '</td>';
+        html += '<td>' + statusBadge + '</td>';
+        html += '</tr>';
+    });
+
+    tbody.innerHTML = html;
 }
 
 </script>
