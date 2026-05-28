@@ -336,7 +336,13 @@
     <div class="nav-tab" onclick="switchTab('reduction')">减员看板</div>
     <div class="nav-tab" onclick="switchTab('feCat')" style="display:none;">前端品类人效看板</div>
     <div class="nav-tab" onclick="switchTab('beCat')" style="display:none;">后端品类人效看板</div>
-    <div class="nav-tab admin-tab" id="adminExpTabBtn" onclick="switchTab('expgroup')">汇报组管理</div>
+    <!-- 【已停用】汇报组管理 Tab 入口
+         停用原因：该 Tab 的功能已由【汇报组管理（新）】完整替代。
+         新 Tab 提供更清晰的只读查阅视图，并增加了移除操作与选择汇报组等功能。
+         旧 Tab 含新建/编辑/删除表单，与「数据来源于管理后台」的定位不符，故停用。
+         代码保留以备回滚，如需恢复删除此注释并取消下方注释即可。
+    -->
+    <!-- <div class="nav-tab admin-tab" id="adminExpTabBtn" onclick="switchTab('expgroup')">汇报组管理</div> -->
     <div class="nav-tab admin-tab" onclick="switchTab('expgroupNew')">汇报组管理（新）</div>
     <!-- <div class="nav-tab admin-tab" id="adminTabBtn" onclick="switchTab('targetcfg')">目标配置</div> -->
     <div class="nav-tab admin-tab" onclick="switchTab('targetsetup')">目标设置</div>
@@ -918,8 +924,15 @@
     </div>
 </div>
 
+<!-- 【已停用】汇报组管理 Section（2026-05-28）
+     停用原因：该模块功能已由【汇报组管理（新）】完整替代。
+     - 新版采用只读查阅模式，数据来源于管理后台，定位更清晰；
+     - 新版新增移除操作、选择汇报组弹窗等功能；
+     - 旧版含新建/编辑/删除表单，与「数据配置在后台」的使用场景不符。
+     代码保留以备回滚：如需恢复，将下方 div 的 display:none!important 去掉即可。
+-->
 <!-- ========== 汇报组管理（管理员可见） ========== -->
-<div class="section" id="expgroup">
+<div class="section" id="expgroup" style="display:none!important;">
     <div class="admin-card">
         <div class="admin-card-title">汇报组管理</div>
         <div class="admin-card-desc">管理AI汇报组：创建、编辑、删除汇报组，配置人员范围与生效时间。</div>
