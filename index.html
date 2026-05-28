@@ -1596,10 +1596,6 @@
                             <option value="2026" selected>2026年</option>
                         </select>
                     </div>
-                    <div style="display:flex;gap:6px;align-items:center;">
-                        <label style="font-size:12px;color:#5a6b7d;">汇报组管理：</label>
-                        <button class="abtn abtn-o" onclick="openReportGroupMgr()" style="font-size:11px;padding:5px 10px;">⚙️ 管理汇报组列表</button>
-                    </div>
                     <button class="abtn abtn-p" onclick="tsReportAddRow()" style="margin-left:auto;">+ 新增行</button>
                     <button class="abtn abtn-s" onclick="tsReportSave()">💾 保存</button>
                     <button class="abtn abtn-o" onclick="tsReportExport()">📤 导出</button>
@@ -8977,13 +8973,13 @@ function tsReportRender() {
         h += '<td>' + tsDelBtn('tsReportDel', ri) + '</td>';
         h += '</tr>';
     });
-    if (!rows.length) h = '<tr><td colspan="7" style="text-align:center;color:#95a5a6;padding:24px;font-size:13px;">暂无数据，点击「新增行」添加配置（请先管理汇报组列表）</td></tr>';
+    if (!rows.length) h = '<tr><td colspan="7" style="text-align:center;color:#95a5a6;padding:24px;font-size:13px;">暂无数据，点击「新增行」添加配置</td></tr>';
     document.getElementById('ts_report_body').innerHTML = h;
 }
 function tsReportAddRow() {
     var year = parseInt(document.getElementById('ts_report_year').value);
     var groups = tsGetReportGroups();
-    if (!groups.length) { alert('请先在「管理汇报组列表」中添加汇报组'); return; }
+    if (!groups.length) { alert('请先点击「新增行」添加汇报组目标配置'); return; }
     tsReportData.push({year:year, month:1, group:groups[0], target:30, redline:25});
     tsReportRender();
 }
